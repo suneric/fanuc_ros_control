@@ -86,8 +86,9 @@ There is currently some confusion over the correct values for the joint limits o
 
 [reference 1](https://github.com/ros-industrial/fanuc/blob/melodic-devel/fanuc_cr35ia_support/urdf/cr35ia_macro.xacro), and [reference 2](https://www.fanuc.co.jp/en/product/catalog/pdf/robot/RCR-35iA(E)-02a.pdf)
 
-|---|---|---|
+
 |joint|min|max|
+|:---:|:---:|:---:|
 |joint 1|-2.9670|2.9670|
 |joint 2|-0.7853|2.0943|
 |joint 3|-2.1450|2.3561|

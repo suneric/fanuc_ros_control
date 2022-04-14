@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="fanuc_ros_control" type="trajectory_control.py" name="fanuc_trajectory" output="screen"/>
+</launch>

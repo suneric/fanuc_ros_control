@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 import rospy
 import sys
@@ -9,10 +10,11 @@ def traj(time):
     jt.header.stamp = rospy.Time.now()
 
     joints_list = [[0,0,0,0,0,0],
-                   [0,0.1,0,0,0,0],
-                   [-0.1,0.1,0,0,0,0],
-                   [0.1,0.1,0,0,0,0],
-                   [0,0,0,0,0,0]]
+                   [-1,0,-1.0,0,0,0],
+                   [0,0.5,0,0,0,0],
+                   [0.3,0,0,0,-1.3,0],
+                   [0,0,0,0,0,0]
+                   ]
     for joints in joints_list:
         jpt = JointTrajectoryPoint()
         jpt.positions = joints

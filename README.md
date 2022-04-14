@@ -84,9 +84,6 @@ roslaunch fanuc_ros_control trajectory.launch
 [Notes](http://wiki.ros.org/fanuc_cr35ia_support):
 There is currently some confusion over the correct values for the joint limits of joints 2 and 3. Version B-83734EN/01 of the Operator's Manual incorrectly states that 1.05 rad equals 120 degrees, and that 0.39 rad equals 45 degrees (joint 2). Additionally, it gives a value of -122.9 degrees for the lower limit of joint 3, whereas (at least) Roboguide Rev K have this limit set to -182 degrees.
 
-[reference 1](https://github.com/ros-industrial/fanuc/blob/melodic-devel/fanuc_cr35ia_support/urdf/cr35ia_macro.xacro), and [reference 2](https://www.fanuc.co.jp/en/product/catalog/pdf/robot/RCR-35iA(E)-02a.pdf)
-
-
 |joint|min|max|
 |:---:|:---:|:---:|
 |joint 1|-2.9670|2.9670|
@@ -95,3 +92,34 @@ There is currently some confusion over the correct values for the joint limits o
 |joint 4|-3.4906|3.4906|
 |joint 5|-1.9198|1.9198|
 |joint 6|-7.8539|7.8539|
+
+information found on pendant (degree)
+
+|joint|min|max|
+|:---:|:---:|:---:|
+|joint 1|-185.00|185.00|
+|joint 2|-45.00|120.00|
+|joint 3|-122.96|135.00|
+|joint 4|-200.00|200.00|
+|joint 5|-110.00|110.00|
+|joint 6|-450.00|450.00|
+
+
+[reference 1](https://github.com/ros-industrial/fanuc/blob/melodic-devel/fanuc_cr35ia_support/urdf/cr35ia_macro.xacro), and [reference 2](https://www.fanuc.co.jp/en/product/catalog/pdf/robot/RCR-35iA(E)-02a.pdf)
+
+
+### Safety
+1. DCS zones, a DCS zone is configured to be a virtual "fence" using the Cartesian position check. A DCS zone is configued for Joint 1 of the robot to be capable of working within +/- 85 degree. If joint 1 exceeds these limits, the robot will perform a stop type of Category 0.
+
+2. joint 2 (-45 degree ~ +58 degree), considered the limited space on upper of the room, limit joint 2 to [0, 45] degree
+3. joint 3 (-116 degree ~ 135 degree)
+
+Recommanded Joint Limit
+|joint|min|max|
+|:---:|:---:|:---:|
+|joint 1|-1.4835|0.3751|
+|joint 2|-0.0150|0.7853|
+|joint 3|-1.0472|0.0000|
+|joint 4|0.0000|0.0000|
+|joint 5|-1.4311|0.0000|
+|joint 6|0.0000|0.0000|

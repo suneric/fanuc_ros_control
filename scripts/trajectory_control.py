@@ -10,33 +10,24 @@ import os
 sys.path.append('..')
 sys.path.append('.')
 
-def test_trajectory():
-    joints_list = [[0,0,0,0,0,0],
-                   [-1,0,-1.0,0,0,0],
-                   [0,0.5,0,0,0,0],
-                   [0.3,0,0,0,-1.3,0],
-                   [0,0,0,0,0,0]
-                   ]
-    return joints_list
-
 def predefined_trajectory(file):
     df = pd.read_csv(file)
-    joint_names = ["J1"," J2"," J3"," J4"," J5"," J6"]
-    joints = df[joint_names]*(3.14/180.0)
-    return joints
-
-def validate_joints(joints):
-    jt1 = joints["J1"]
-    jt2 = joints[" J2"]
-    jt3 = joints[" J3"]
-    jt4 = joints[" J4"]
-    jt5 = joints[" J5"]
-    jt6 = joints[" J6"]
-    jts = []
-    for i in range(len(jt1)):
-        jts.append([jt1[i],jt2[i],jt3[i],jt4[i],jt5[i],jt6[i]])
-    return jts
-
+    # print(df.columns, df.shape[0], df.loc[[0]]["J1"])
+    trajectory_list = []
+    count = df.shape[0]
+    column_names = ["J1", " J2", " J3", " J4", " J5", " J6",
+                    " SPEED_J1", " SPEED_J2", " SPEED_J3", " SPEED_J4", " SPEED_J5", " SPEED_J6",
+                    " ACCEL_J1", " ACCEL_J2", " ACCEL_J3", " ACCEL_J4", " ACCEL_J5", " ACCEL_J6"]
+    record = df[column_names].values
+    ids = df[" MOVE_ID"].values
+    times = df[" TIME_S"].values
+    for i in range(count):
+        t = times[i]
+        id = int(ids[i])
+        trajectory = record[i]*(3.1415926/180)
+        # print(id, t, trajectory)
+        trajectory_list.append([id, t, trajectory])
+    return trajectory_list
 
 
 """
@@ -63,11 +54,12 @@ def validate_joints(joints):
 
 
 class FanucTrajectortPlayer:
-    def __init__(self, joints_list, max_iter=1):
-        self.joints_list = joints_list
+    def __init__(self, trajectory, max_iter=1):
+        self.trajectory = trajectory
         self.max_iter = max_iter
         self.count = 0
         self.robot_mode = 0
+        self.robot_motion_possible = 0
         self.robot_motion_status = 0
         self.robot_error = 0
         self.traj_pub = rospy.Publisher('joint_path_command', JointTrajectory, queue_size=1)
@@ -81,13 +73,13 @@ class FanucTrajectortPlayer:
         self.robot_stop = data.e_stopped.val
 
     def is_robot_ready(self):
-        #print("mode: {}, status: {}, error: {}".format(self.robot_mode,self.robot_motion_status,self.robot_error))
-        if self.robot_mode == 2 and not self.robot_motion_status and not self.robot_error:
+        print("mode: {}, possible: {}, status: {}, error: {}".format(self.robot_mode, self.robot_motion_possible, self.robot_motion_status,self.robot_error))
+        if self.robot_mode == 2 and self.robot_motion_possible and not self.robot_motion_status and not self.robot_error:
             return True
         else:
             return False
 
-    def initial(self,time = 20):
+    def initial(self):
         jt = JointTrajectory()
         jt.joint_names = ['joint_1','joint_2','joint_3','joint_4','joint_5','joint_6']
         jt.header.stamp = rospy.Time.now()
@@ -95,19 +87,20 @@ class FanucTrajectortPlayer:
         jpt = JointTrajectoryPoint()
         jpt.positions = [0]*6
         jpt.velocities = [0]*6
-        jpt.time_from_start = rospy.Duration(time)
+        jpt.time_from_start = rospy.Duration(1.0)
         jt.points.append(jpt)
         self.traj_pub.publish(jt)
 
-    def execute_traj(self, joint_list, time = 20):
+    def execute_traj(self, trajectory):
         jt = JointTrajectory()
         jt.joint_names = ['joint_1','joint_2','joint_3','joint_4','joint_5','joint_6']
         jt.header.stamp = rospy.Time.now()
-        for joints in joint_list:
+        for joint in trajectory:
             jpt = JointTrajectoryPoint()
-            jpt.positions = joints
-            jpt.velocities = [0]*6
-            jpt.time_from_start = rospy.Duration(time)
+            jpt.positions = joint[2][:6]
+            jpt.velocities = joint[2][6:12]
+            jpt.accelerations = joint[2][12:]
+            jpt.time_from_start = rospy.Duration(joint[1])
             jt.points.append(jpt)
         return jt
 
@@ -117,9 +110,10 @@ class FanucTrajectortPlayer:
             if self.is_robot_ready():
                 if self.count >= self.max_iter:
                     print("max attempts reached.")
+                    # self.initial()
                     break;
 
-                jt = self.execute_traj(self.joints_list,time=20)
+                jt = self.execute_traj(self.trajectory)
                 self.traj_pub.publish(jt)
                 self.count += 1
                 print("execute trajectory", self.count)
@@ -130,12 +124,11 @@ if __name__ == '__main__':
     # read trajectory
     dir = os.path.dirname(os.path.realpath(__file__))
     traj_file = os.path.join(dir,'../data/progOutput.csv')
-    jt_list = predefined_trajectory(traj_file)
-    jt_list = validate_joints(jt_list)
-    print("trajectory length",len(jt_list))
+    trajectory = predefined_trajectory(traj_file)
+    print("Length of trajectory: {}".format(len(trajectory)))
 
     rospy.init_node('fanuc_traj', anonymous=True)
-    robot = FanucTrajectortPlayer(jt_list, max_iter=1)
+    robot = FanucTrajectortPlayer(trajectory, max_iter=2)
     try:
         robot.run()
     except rospy.ROSInterruptException:

@@ -26,9 +26,9 @@ def predefined_trajectory(file):
     return joints
 
 def validate_joints(joints):
-    jt1 = joints["J1"]-0.5
-    jt2 = joints[" J2"]-0.75
-    jt3 = joints[" J3"]-1.0
+    jt1 = joints["J1"]
+    jt2 = joints[" J2"]
+    jt3 = joints[" J3"]
     jt4 = joints[" J4"]
     jt5 = joints[" J5"]
     jt6 = joints[" J6"]
@@ -36,17 +36,6 @@ def validate_joints(joints):
     for i in range(len(jt1)):
         jts.append([jt1[i],jt2[i],jt3[i],jt4[i],jt5[i],jt6[i]])
     return jts
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -146,7 +135,7 @@ if __name__ == '__main__':
     print("trajectory length",len(jt_list))
 
     rospy.init_node('fanuc_traj', anonymous=True)
-    robot = FanucTrajectortPlayer(jt_list, max_iter=5)
+    robot = FanucTrajectortPlayer(jt_list, max_iter=1)
     try:
         robot.run()
     except rospy.ROSInterruptException:

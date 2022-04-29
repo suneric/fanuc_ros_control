@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from industrial_msgs.msg import RobotStatus
 from sensor_msgs.msg import JointState

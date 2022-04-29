@@ -28,6 +28,11 @@ $ catkin build
 $ source $HOME/catkin_ws/devel/setup.bash
 ```
 
+3. pandas
+```
+pip install pandas
+```
+
 ## start ROS server on fanuc controller
 Assuming the fanuc ROS driver has been installed on the fanuc controller.
 
